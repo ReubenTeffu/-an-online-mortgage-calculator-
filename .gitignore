@@ -25,3 +25,67 @@ payment = payment + (propertyTax + insurance) / 12;
 
 txtPayment.CurrentValue = (int)payment;
 }
+string[] masks = new string[] { "#", "##", "###", "#,###", "##,###", "###,###", "#,###,###", "##,###,###", "###,###,###", "#,###,###,###" };
+protected override void OnKeyDown(KeyEventArgs e)
+ {
+ 
+
+   // get the character that was pressed
+   char keycode = (char)e.KeyValue;
+
+   // determine if the character pressed was numeric or
+   // if the character would go beyond the limit of the largest mask
+
+   if ((!IsNumeric(keycode)) || Text.Length >= masks[masks.Length - 1].Length)
+    {
+        // if it's not numeric, don't try to handle it
+       // and suppress the character so it won't be displayed
+       e.Handled = true;
+
+       e.SuppressKeyPress = true;
+       if (keycode != '\b')
+           {
+               // if it's a backspace, we still want to react to the keypress, otherwise return
+              return;
+           }
+    }
+
+  // add the character to the final string if its not a backspace
+    if (keycode != '\b')
+        {
+           Text += keycode;
+        }
+
+  // take out all the commas, to get the raw number
+       _currentTypedValue = SubtractCommas(Text);
+
+  // handle the backspace by removing the digit at the end of the string
+  if (keycode == '\b') // take out a character
+   {
+       if (SelectionStart >= 0)
+         {
+               if (_currentTypedValue.Length > 0)
+                 {
+                    _currentTypedValue = _currentTypedValue.Remove(_currentTypedValue.Length - 1, 1);
+                 }
+     }
+
+}
+
+  // Put the commas back in the number string using the
+  // mask that matches the number string length
+
+   _currentTypedValue = AddCommas(_currentTypedValue);
+
+   // Assign the Text property of the edit box to the
+  // comma decorated string
+      Text = _currentTypedValue;
+      if (Text.Length > 0)
+         {
+           // select the last character
+            Select(Text.Length - 1, 1);
+          }
+
+  // mark that we have just handled the key press event
+    e.Handled = true;
+}
